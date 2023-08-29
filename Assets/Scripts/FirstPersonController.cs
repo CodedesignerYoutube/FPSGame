@@ -74,6 +74,12 @@ namespace StarterAssets
 
 		private const float _threshold = 0.01f;
 
+        public static bool ForceStop
+        {
+            get;
+            set;
+        }
+
 		private bool IsCurrentDeviceMouse
 		{
 			get
@@ -87,9 +93,10 @@ namespace StarterAssets
 		}
 
 		private void Awake()
-		{
-			// get a reference to our main camera
-			if (_mainCamera == null)
+        {
+            ForceStop = false;
+            // get a reference to our main camera
+            if (_mainCamera == null)
 			{
 				_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
 			}
@@ -112,7 +119,7 @@ namespace StarterAssets
 
 		private void Update()
 		{
-            if (!PlayerHealthController.Instance.IsAlive)
+            if (!PlayerHealthController.Instance.IsAlive || ForceStop)
             {
                 return;
             }
@@ -123,7 +130,7 @@ namespace StarterAssets
 
 		private void LateUpdate()
 		{
-            if (!PlayerHealthController.Instance.IsAlive)
+            if (!PlayerHealthController.Instance.IsAlive || ForceStop)
             {
                 return;
             }
