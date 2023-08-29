@@ -23,11 +23,19 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float walkingSpeed = 2;
     [SerializeField] private float runningSpeed = 3;
 
+    [SerializeField] private AudioClip walkSound;
+    [SerializeField] private AudioClip idleSound;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private AudioClip deathSound;
+
+
     public bool IsDead { get; private set; }
 
     private Animator _animator;
     private NavMeshAgent _agent;
     private Transform _player;
+
+    private AudioSource _audioSource;
 
     private enum AnimationName
     {
@@ -40,6 +48,7 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
+        _audioSource = GetComponent<AudioSource>();
         _animator = GetComponent<Animator>();
         _agent = GetComponent<NavMeshAgent>();
         _player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -63,13 +72,19 @@ public class Enemy : MonoBehaviour
 
     public void Dead()
     {
-        if(!IsDead)
+        if (!IsDead)
         {
             _animator.SetTrigger(AnimationName.Dead.ToString());
-        }
 
-        IsDead = true;
+            // Play the death sound directly
+            _audioSource.clip = deathSound;
+            _audioSource.loop = false; // Assuming you don't want the death sound to loop
+            _audioSource.Play();
+
+            IsDead = true;
+        }
     }
+
 
 
     private void LateUpdate()
@@ -97,21 +112,37 @@ public class Enemy : MonoBehaviour
         if (distance >= detectionDistance)
         {
             ActivateAnimationClip(AnimationName.Idle);
+            PlayAudio(idleSound);
         }
         else if (distance >= runningDistance && distance < detectionDistance)
         {
             ActivateAnimationClip(AnimationName.Walk);
             _agent.speed = walkingSpeed;
+            PlayAudio(walkSound);
         }
         else if (distance < runningDistance && distance >= attackingDistance)
         {
             ActivateAnimationClip(AnimationName.Run);
             _agent.speed = runningSpeed;
+            PlayAudio(walkSound);
         }
         else
         {
             ActivateAnimationClip(AnimationName.Attack);
+            PlayAudio(attackSound);
         }
 
     }
+
+
+    private void PlayAudio(AudioClip clip)
+    {
+        if (_audioSource.clip != clip || !_audioSource.isPlaying)
+        {
+            _audioSource.clip = clip;
+            _audioSource.loop = true;
+            _audioSource.Play();
+        }
+    }
+
 }
